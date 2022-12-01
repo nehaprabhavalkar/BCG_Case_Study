@@ -1,0 +1,9 @@
+data:
+  charges_path: './data/charges.csv'
+  damages_path: './data/damages.csv'
+  endorse_path: './data/endorse.csv'
+  primary_person_path: './data/primary_person.csv'
+  restrict_path: './data/restrict.csv'
+  units_path: './data/units.csv'
+
+  

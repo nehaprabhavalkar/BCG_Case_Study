@@ -9,5 +9,9 @@ def load_config(path):
     return config_data 
 
 def create_spark_session(app_name):
+    spark = SparkSession.builder \
+            .appName(app_name) \
+            .enableHiveSupport() \
+            .getOrCreate()      
     
     return spark
