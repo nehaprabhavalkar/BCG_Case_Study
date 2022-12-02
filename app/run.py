@@ -1,5 +1,5 @@
 from app.code import analyze_data 
-from app.utils import create_spark_session, load_config
+from app.utils.helper import create_spark_session, load_config
 
 jobs = {
     'analyze_data': analyze_data.process
