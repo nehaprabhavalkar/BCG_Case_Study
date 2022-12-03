@@ -14,7 +14,7 @@ def process(spark, config):
 
 
     unit_df = spark.read.option('header', 'true').option('inferSchema', 'true').csv(units_path).select(col('UNIT_DESC_ID'), col('CRASH_ID'), col('VEH_MAKE_ID'), col('VEH_BODY_STYL_ID'),
-                                                                                                  col('VEH_DMAG_SCL_1_ID'), col('VEH_DMAG_SCL_2_ID'))
+                                                                                                  col('VEH_DMAG_SCL_1_ID'), col('VEH_DMAG_SCL_2_ID'), col('VEH_COLOR_ID'))
     
     analysis_1(person_df)
 
@@ -29,6 +29,8 @@ def process(spark, config):
     analysis_6(person_df)
     
     analysis_7(unit_df)
+    
+    analysis_8(person_df, unit_df)
     
     
                                                                                                   
@@ -107,3 +109,37 @@ def analysis_7(unit_df):
     print("Count of Distinct Crash IDs where No Damaged Property was observed: ")
     crash_cnt_df.show()
     
+
+def analysis_8(person_df, unit_df):
+    person_df = person_df.select(col('CRASH_ID'), col('DRVR_LIC_STATE_ID'), col('PRSN_INJRY_SEV_ID')) 
+    unit_df = unit_df.select(col('CRASH_ID'), col('VEH_COLOR_ID'), col('VEH_MAKE_ID'))
+    
+    injured_df = person_df.filter(col('PRSN_INJRY_SEV_ID').isin(['POSSIBLE INJURY', 'KILLED', 'INCAPACITATING INJURY', 'NON-INCAPACITATING INJURY']))
+    offence_df = injured_df.select('CRASH_ID','DRVR_LIC_STATE_ID').groupBy('CRASH_ID', 'DRVR_LIC_STATE_ID').count().\
+                            withColumnRenamed('count', 'offence_cnt')
+    
+    w = Window.orderBy(col('offence_cnt').desc())
+    
+    top25_states = offence_df.withColumn('row_number', row_number().over(w)).filter(col('row_number') <= lit(25)).\
+                                drop('row_number', 'offence_cnt')
+    
+    veh_color_df = unit_df.select('VEH_COLOR_ID', 'CRASH_ID').groupBy('CRASH_ID', 'VEH_COLOR_ID').count().withColumnRenamed('count', 'color_cnt')
+    
+    w = Window.orderBy(col('color_cnt').desc())
+    
+    top10_colors = veh_color_df.withColumn('row_number', row_number().over(w)).filter(col('row_number') <= lit(10)).drop('row_number', 'color_cnt')
+    
+    veh_make_df = unit_df.select('CRASH_ID', 'VEH_MAKE_ID').groupBy('CRASH_ID','VEH_MAKE_ID').count().withColumnRenamed('count', 'veh_make_cnt')
+    
+    w = Window.orderBy(col('veh_make_cnt').desc())
+    
+    top5_veh_make = veh_make_df.withColumn('row_number', row_number().over(w)).filter(col('row_number') <= lit(10)).drop('row_number', 'veh_make_cnt')
+    
+    join_states_color_df = top25_states.join(top10_colors, on = ['CRASH_ID'], how = 'inner')
+    join_states_veh_make_df = join_states_color_df.join(top5_veh_make, on = ['CRASH_ID'], how = 'inner')
+    
+    print("""Top 5 Vehicle Makes where drivers are charged with speeding related offences,
+           has licensed Drivers, uses top 10 used vehicle colours and has car licensed with the Top 25 states 
+           with highest number of offences""")
+    
+    join_states_veh_make_df.show()
