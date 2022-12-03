@@ -4,7 +4,7 @@ from pyspark.sql import SparkSession
 
 
 def load_config(path):
-    file = open('./conf/config.yaml', 'r')
+    file = open(str(os.getcwd()) + '/app/conf/config.yaml', 'r')
     config_data = yaml.load(file, Loader=SafeLoader)
     return config_data 
 
