@@ -3,10 +3,9 @@ from yaml.loader import SafeLoader
 from pyspark.sql import SparkSession
 import os 
 
-PATH_TO_CONFIG = "/app/conf/config.yaml"
 
 def load_config(path):
-    file = open(str(os.getcwd()) + PATH_TO_CONFIG, 'r')
+    file = open(os.getcwd() + '/' + path, 'r')
     config_data = yaml.load(file, Loader=SafeLoader)
     return config_data 
 
