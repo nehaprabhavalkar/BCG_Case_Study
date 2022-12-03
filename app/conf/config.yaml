@@ -1,9 +1,9 @@
 data:
-  charges_path: './data/charges.csv'
-  damages_path: './data/damages.csv'
-  endorse_path: './data/endorse.csv'
-  primary_person_path: './data/primary_person.csv'
-  restrict_path: './data/restrict.csv'
-  units_path: './data/units.csv'
+  charges_path: 's3://bcg-case-study/data/charges.csv'
+  damages_path: 's3://bcg-case-study/data/damages.csv'
+  endorse_path: 's3://bcg-case-study/data/endorse.csv'
+  primary_person_path: 's3://bcg-case-study/data/primary_person.csv'
+  restrict_path: 's3://bcg-case-study/data/restrict.csv'
+  units_path: 's3://bcg-case-study/data/units.csv'
 
   
